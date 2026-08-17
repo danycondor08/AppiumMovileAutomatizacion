@@ -1,6 +1,8 @@
 package com.nttdata.steps;
 
 import com.nttdata.screens.ProductScreen;
+import java.util.List;
+import java.util.Map;
 
 public class ProductSteps {
 
@@ -29,5 +31,26 @@ public class ProductSteps {
 
     public void volverAGaleria() {
         productScreen.volverAGaleria();
+    }
+
+    public void volverAlCatalogoDesdeMenu() {
+        productScreen.abrirMenuYIrACatalogo();
+    }
+
+    public void hacerClicEnElCarrito() {
+        productScreen.hacerClicEnCarrito();
+    }
+
+    // Nuevo método integrado
+    public void agregarProductosDesdeTabla(List<Map<String, String>> productos) {
+        for (Map<String, String> fila : productos) {
+            String nombreProducto = fila.get("producto");
+            int cantidad = Integer.parseInt(fila.get("cantidad"));
+
+            seleccionarProducto(nombreProducto);
+            indicarCantidad(cantidad);
+            hacerClicAddToCart();
+            volverAlCatalogoDesdeMenu();
+        }
     }
 }

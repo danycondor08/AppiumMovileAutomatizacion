@@ -20,31 +20,53 @@ public class ProductScreen {
 
     public void seleccionarProducto(String productName) {
         AndroidDriver driver = AppConfigScreen.getDriver();
-        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(15));
 
-        // Realiza scroll en la galería principal hasta encontrar el producto
-        driver.findElement(AppiumBy.androidUIAutomator(
-                "new UiScrollable(new UiSelector().scrollable(true))" +
-                        ".scrollIntoView(new UiSelector().text(\"" + productName + "\"))"
-        ));
-
-        WebElement producto = wait.until(ExpectedConditions.elementToBeClickable(
-                AppiumBy.accessibilityId(productName)
-        ));
-        producto.click();
+        try {
+            // 1. Intentar hacer clic directamente si ya está visible en la vista actual
+            WebElement producto = wait.until(ExpectedConditions.elementToBeClickable(
+                    AppiumBy.accessibilityId(productName)
+            ));
+            producto.click();
+        } catch (Exception e) {
+            try {
+                // 2. Si no es visible, hacer scroll vertical buscando por descripción exacta
+                WebElement productoScroll = driver.findElement(AppiumBy.androidUIAutomator(
+                        "new UiScrollable(new UiSelector().scrollable(true).instance(0))" +
+                                ".scrollIntoView(new UiSelector().description(\"" + productName + "\"));"
+                ));
+                productoScroll.click();
+            } catch (Exception ex) {
+                // 3. Fallback dinámico usando descripción parcial basada en el productName recibido
+                WebElement productoFallback = driver.findElement(AppiumBy.androidUIAutomator(
+                        "new UiScrollable(new UiSelector().scrollable(true).instance(0))" +
+                                ".scrollIntoView(new UiSelector().descriptionContains(\"" + productName + "\"));"
+                ));
+                productoFallback.click();
+            }
+        }
     }
 
     public void indicarCantidad(int cantidadDeseada) {
         AndroidDriver driver = AppConfigScreen.getDriver();
-        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(15));
 
-        // Localizamos el elemento que muestra la cantidad actual en pantalla
-        WebElement txtCantidad = wait.until(ExpectedConditions.visibilityOfElementLocated(
-                By.id("com.saucelabs.mydemoapp.android:id/noTV")
+        // 1. Esperar a que cargue la pantalla de detalles asegurando la visibilidad del producto
+        wait.until(ExpectedConditions.visibilityOfElementLocated(
+                By.id("com.saucelabs.mydemoapp.android:id/productIV")
         ));
 
-        int cantidadActual = Integer.parseInt(txtCantidad.getText());
+        // 2. Hacer scroll vertical para asegurar que los botones de cantidad y el contador sean visibles
+        try {
+            driver.findElement(AppiumBy.androidUIAutomator(
+                    "new UiScrollable(new UiSelector().scrollable(true).instance(0))" +
+                            ".scrollIntoView(new UiSelector().resourceId(\"com.saucelabs.mydemoapp.android:id/plusIV\"));"
+            ));
+        } catch (Exception e) {
+            // Ignorar si ya está visible
+        }
 
+        // 3. Obtener los botones de incremento y decremento
         WebElement btnPlus = wait.until(ExpectedConditions.elementToBeClickable(
                 By.id("com.saucelabs.mydemoapp.android:id/plusIV")
         ));
@@ -53,14 +75,32 @@ public class ProductScreen {
                 By.id("com.saucelabs.mydemoapp.android:id/minusIV")
         ));
 
-        // Ajusta dinámicamente si la cantidad en pantalla es mayor o menor a la deseada
-        while (cantidadActual < cantidadDeseada) {
-            btnPlus.click();
-            cantidadActual++;
-        }
-        while (cantidadActual > cantidadDeseada) {
-            btnMinus.click();
-            cantidadActual--;
+        // 4. Bucle controlado con pausas de sincronización estrictas para evitar sobreclics
+        for (int intento = 0; intento < 15; intento++) {
+            try {
+                WebElement txtCantidad = wait.until(ExpectedConditions.visibilityOfElementLocated(
+                        By.id("com.saucelabs.mydemoapp.android:id/noTV")
+                ));
+
+                String textoValor = txtCantidad.getText();
+                if (textoValor != null && !textoValor.trim().isEmpty()) {
+                    int cantidadActual = Integer.parseInt(textoValor.trim());
+
+                    if (cantidadActual > cantidadDeseada) {
+                        btnMinus.click();
+                        // Pausa generosa y obligatoria para que Android procese el evento gráfico del botón menos
+                        Thread.sleep(800);
+                    } else if (cantidadActual < cantidadDeseada) {
+                        btnPlus.click();
+                        // Pausa generosa y obligatoria para que Android procese el evento gráfico del botón más
+                        Thread.sleep(800);
+                    } else {
+                        break; // ¡Llegó exactamente al valor deseado y se detiene de inmediato!
+                    }
+                }
+            } catch (Exception e) {
+                try { Thread.sleep(500); } catch (InterruptedException ignored) {}
+            }
         }
     }
 
@@ -87,5 +127,30 @@ public class ProductScreen {
         if (driver != null) {
             driver.navigate().back();
         }
+    }
+
+    public void abrirMenuYIrACatalogo() {
+        AndroidDriver driver = AppConfigScreen.getDriver();
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+
+        WebElement btnMenu = wait.until(ExpectedConditions.elementToBeClickable(
+                By.id("com.saucelabs.mydemoapp.android:id/menuIV")
+        ));
+        btnMenu.click();
+
+        WebElement opcionCatalog = wait.until(ExpectedConditions.elementToBeClickable(
+                AppiumBy.androidUIAutomator("new UiSelector().text(\"Catalog\")")
+        ));
+        opcionCatalog.click();
+    }
+
+    public void hacerClicEnCarrito() {
+        AndroidDriver driver = AppConfigScreen.getDriver();
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+
+        WebElement btnCarrito = wait.until(ExpectedConditions.elementToBeClickable(
+                By.id("com.saucelabs.mydemoapp.android:id/cartTV")
+        ));
+        btnCarrito.click();
     }
 }

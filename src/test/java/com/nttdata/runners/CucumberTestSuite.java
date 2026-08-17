@@ -8,7 +8,7 @@ import org.junit.runner.RunWith;
 @CucumberOptions(
         features = "src/test/resources/features",
         glue = "com.nttdata.stepsdefinitions",
-        tags = "@SauceLabsExamen",
+        tags = "@FlujoCompleto",
         plugin = {
                 "pretty",
                 "html:target/cucumber-report.html",
