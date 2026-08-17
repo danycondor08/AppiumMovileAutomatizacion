@@ -18,4 +18,15 @@ public class CartScreen {
         ));
         btnCheckout.click();
     }
+
+    // <-- NUEVO MÉTODO PARA HACER CLIC EN REMOVER ITEM -->
+    public void hacerClicEnRemoverItem() {
+        AndroidDriver driver = AppConfigScreen.getDriver();
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(15));
+
+        WebElement btnRemove = wait.until(ExpectedConditions.elementToBeClickable(
+                By.id("com.saucelabs.mydemoapp.android:id/removeBt")
+        ));
+        btnRemove.click();
+    }
 }

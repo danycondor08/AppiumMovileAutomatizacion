@@ -13,13 +13,14 @@ public class LoginScreen {
         AndroidDriver driver = AppConfigScreen.getDriver();
         WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(15));
 
-        // Localizadores estándar de MyDemoApp para el login
         WebElement txtUsername = wait.until(ExpectedConditions.elementToBeClickable(
                 By.id("com.saucelabs.mydemoapp.android:id/nameET")
         ));
+        txtUsername.clear();
         txtUsername.sendKeys(user);
 
         WebElement txtPassword = driver.findElement(By.id("com.saucelabs.mydemoapp.android:id/passwordET"));
+        txtPassword.clear();
         txtPassword.sendKeys(password);
     }
 
@@ -31,5 +32,27 @@ public class LoginScreen {
                 By.id("com.saucelabs.mydemoapp.android:id/loginBtn")
         ));
         btnLogin.click();
+    }
+
+    // <-- NUEVOS MÉTODOS PARA EL FLUJO DE LOGIN INVÁLIDO -->
+    public void escribirUsuario(String usuario) {
+        AndroidDriver driver = AppConfigScreen.getDriver();
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(15));
+
+        WebElement txtUsername = wait.until(ExpectedConditions.elementToBeClickable(
+                By.id("com.saucelabs.mydemoapp.android:id/nameET")
+        ));
+        txtUsername.clear();
+        txtUsername.sendKeys(usuario);
+    }
+
+    public String obtenerMensajeErrorPassword() {
+        AndroidDriver driver = AppConfigScreen.getDriver();
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(15));
+
+        WebElement lblError = wait.until(ExpectedConditions.visibilityOfElementLocated(
+                By.xpath("//*[@text='Enter Password']")
+        ));
+        return lblError.getText();
     }
 }

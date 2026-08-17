@@ -10,4 +10,17 @@ public class LoginSteps {
         loginScreen.ingresarCredenciales(user, password);
         loginScreen.hacerClicEnLogin();
     }
+
+    // <-- NUEVOS MÉTODOS INTERMEDIARIOS -->
+    public void escribirUsuario(String usuario) {
+        loginScreen.escribirUsuario(usuario);
+    }
+
+    public void hacerClicLogin() {
+        loginScreen.hacerClicEnLogin();
+    }
+
+    public String obtenerErrorPassword() {
+        return loginScreen.obtenerMensajeErrorPassword();
+    }
 }

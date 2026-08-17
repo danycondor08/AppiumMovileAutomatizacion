@@ -9,4 +9,9 @@ public class CartSteps {
     public void hacerClicProceedToCheckout() {
         cartScreen.hacerClicProceedToCheckout();
     }
+
+    // <-- NUEVO MÉTODO INTERMEDIARIO -->
+    public void removerItemDelCarrito() {
+        cartScreen.hacerClicEnRemoverItem();
+    }
 }
